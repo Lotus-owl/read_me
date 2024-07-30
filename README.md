@@ -115,7 +115,7 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-source /opt/ros/foxy/setup.bash
+source /opt/ros/humble/setup.bash
 source ~/robot_ws/install/local_setup.bash
 
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
@@ -148,7 +148,7 @@ alias cbu='colcon build --symlink-install --packages-up-to'
 alias ct='colcon test'
 alias ctp='colcon test --packages-select'
 alias ctr='colcon test-result'
-alias sb=’source ~/.bashrc’
+alias sb='source ~/.bashrc'
 
 alias rt='ros2 topic list'
 alias re='ros2 topic echo'
