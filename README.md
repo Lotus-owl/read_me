@@ -47,12 +47,12 @@ esac
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-   # We have color support; assume it's compliant with Ecma-48
-   # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-   # a case would tend to support setf rather than setaf.)
-   color_prompt=yes
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
     else
-   color_prompt=
+	color_prompt=
     fi
 fi
 
@@ -115,16 +115,19 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
 source /opt/ros/humble/setup.bash
 source ~/robot_ws/install/local_setup.bash
+source ~/team/install/local_setup.bash
 
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
 source /usr/share/vcstool-completion/vcs.bash
 source /usr/share/colcon_cd/function/colcon_cd.sh
 export _colcon_cd_root=~/robot_ws
 export TURTLEBOT3_MODEL=burger
-export ROS_DOMAIN_ID=7
+export ROS_DOMAIN_ID=15
 export ROS_NAMESPACE=robot1
+source /usr/share/gazebo/setup.bash
 
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 # export RMW_IMPLEMENTATION=rmw_connext_cpp
@@ -138,10 +141,14 @@ export RCUTILS_LOGGING_USE_STDOUT=0
 export RCUTILS_LOGGING_BUFFERED_STREAM=1
 
 alias cw='cd ~/robot_ws'
+alias cwt='cd ~/team'
+
+
 alias cs='cd ~/robot_ws/src'
 alias ccd='colcon_cd'
 
 alias cb='cd ~/robot_ws && colcon build --symlink-install'
+alias cbt='cd ~/team && colcon build --symlink-install'
 alias cbs='colcon build --symlink-install'
 alias cbp='colcon build --symlink-install --packages-select'
 alias cbu='colcon build --symlink-install --packages-up-to'
@@ -163,7 +170,5 @@ alias testpub='ros2 run demo_nodes_cpp talker'
 alias testsub='ros2 run demo_nodes_cpp listener'
 alias testpubimg='ros2 run image_tools cam2image'
 alias testsubimg='ros2 run image_tools showimage'
-alias testpub='ros2 run demo_nodes_cpp talker'
-alias testsub='ros2 run demo_nodes_cpp listener'
-alias testpubimg='ros2 run image_tools cam2image'
-alias testsubimg='ros2 run image_tools showimage'
+
+alias mb="sudo nano ~/.bashrc"
