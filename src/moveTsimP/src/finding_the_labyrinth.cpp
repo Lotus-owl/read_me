@@ -1,6 +1,12 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
+
+#include "cv_bridge/cv_bridge.h"
+#include "opencv2/opencv.hpp"
+#include "sensor_msgs/msg/image.hpp"
+
+
 #include <chrono>
 #include <iostream>
 
@@ -11,7 +17,7 @@ class LaserSensor : public rclcpp::Node
 {
 public:
     LaserSensor()
-        : Node("laser_sensor")
+        : Node("laser_sensorr")
     {
         auto qos_profile = rclcpp::SensorDataQoS();
         auto qos_profile2 = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -19,6 +25,8 @@ public:
         _twist_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel", qos_profile2);
         _pub_timer = create_wall_timer(30ms, std::bind(&LaserSensor::pub_twist, this));
         _update_timer = create_wall_timer(10ms, std::bind(&LaserSensor::update, this));
+
+        _sub2 = create_subscription<sensor_msgs::msg::CompressedImage>("/image_raw/compressed", qos_profile2, std::bind(&LaserSensor::sub_img, this, std::placeholders::_1));
     }
 
 private:
@@ -28,6 +36,19 @@ private:
     rclcpp::TimerBase::SharedPtr _pub_timer;
     rclcpp::TimerBase::SharedPtr _update_timer;
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr _sub;
+
+    rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr _sub2;
+    void sub_img(const sensor_msgs::msg::CompressedImage msg)
+    {
+        cv_bridge::CvImagePtr cv_ptr;
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        cv::Mat img = cv_ptr->image;
+        //cv::Mat canny;
+        //cv::Canny(img, canny, 100, 200);
+        cv::imshow("img", img);
+        cv::waitKey(30);
+    }
+
     void pub_twist()
     {
         _twist_pub->publish(_twist);
@@ -45,15 +66,17 @@ private:
             return;
         }
 
-        if (_laser_data.ranges[0] > 0.3)
+        if (_laser_data.ranges[0] > 0.2)
         {
             _twist.linear.x = 0.1;
             _twist.angular.z = 0.0;
+            RCLCPP_INFO(this->get_logger(), "No wall detected. Moving forward.");
         }
         else
         {
             _twist.linear.x = -0.1;
-            _twist.angular.z = 0.0;
+            _twist.angular.z = 0.9;
+            RCLCPP_WARN(this->get_logger(), "Wall detected! Reversing.");
         }
 
         

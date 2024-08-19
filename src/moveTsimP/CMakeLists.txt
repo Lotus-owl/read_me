@@ -17,11 +17,12 @@ find_package(rclcpp_action REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(include)
 
 add_executable(finding_the_labyrinth src/finding_the_labyrinth.cpp)
-ament_target_dependencies(finding_the_labyrinth rclcpp geometry_msgs sensor_msgs)
+ament_target_dependencies(finding_the_labyrinth rclcpp geometry_msgs sensor_msgs cv_bridge OpenCV)
 
 #install
 install(TARGETS
