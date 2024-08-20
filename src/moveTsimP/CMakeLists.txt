@@ -24,9 +24,13 @@ include_directories(include)
 add_executable(finding_the_labyrinth src/finding_the_labyrinth.cpp)
 ament_target_dependencies(finding_the_labyrinth rclcpp geometry_msgs sensor_msgs cv_bridge OpenCV)
 
+add_executable(gpt src/gpt.cpp)
+ament_target_dependencies(gpt rclcpp geometry_msgs sensor_msgs cv_bridge OpenCV)
+
 #install
 install(TARGETS
   finding_the_labyrinth
+  gpt
   DESTINATION lib/${PROJECT_NAME}
 )
 
