@@ -65,8 +65,11 @@ private:
         RCLCPP_INFO(this->get_logger(), "_laser_data2.ranges.size():: %lu", _laser_data2.ranges.size());
         for (long unsigned int i=0; i < _laser_data2.ranges.size();i++)
         {
-            if(_laser_data2.range[i] == 0.0f|| std::isnan(_laser_data[45])){
-            
+            if(_laser_data2.ranges[i] == 0.0f){
+                continue;
+            }
+            if(std::isnan(_laser_data2.ranges[i])){
+                _laser_data2.ranges[i] = 3.5; 
             }
             auto degree = (_laser_data2.angle_min+ _laser_data2.angle_increment * i)*180/3.1415926535;
             auto int_degree = (int)degree;
@@ -89,29 +92,35 @@ private:
             _twist.linear.x = 0.1;
             _twist.angular.z = 0.0;
             RCLCPP_INFO(this->get_logger(), "false로 돌아옴");
-            if (_laser_data[0] < 0.3)
-            {
-                _is_wall = true;
-                RCLCPP_INFO(this->get_logger(), "wa");
-            }
-        }else{
-            // 로봇이 전방이나 양 옆에서 벽을 감지할 때
-            if (_laser_data[0] < 0.3 || _laser_data[45] < 0.3)
-            {
-                _twist.linear.x = 0.0;
-                _twist.angular.z = 0.0;
-                // || _laser_data[315] < 0.3
-                RCLCPP_INFO(this->get_logger(), "오른쪽 회전:: ");
-                RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[0]);
-                RCLCPP_INFO(this->get_logger(), "45:: %f", _laser_data[45]);
-                RCLCPP_INFO(this->get_logger(), "315:: %f", _laser_data[315]);
-                // 정지 후 오른쪽으로 회전
-                if(_laser_data[45] == 0.0f|| std::isnan(_laser_data[45])){
-                    RCLCPP_INFO(this->get_logger(), "45위치가 없어요");
-                }else{
-                    rotate_90_degrees();  // 벽을 만나면 90도 회전
+            for (int i = 355; i <= 364; ++i) {
+                int value = (i > 359) ? (i - 359) : i;
+                if (_laser_data[i] < 0.3)
+                {
+                    _is_wall = true;
+                    RCLCPP_INFO(this->get_logger(), "wa");
+                    RCLCPP_INFO(this->get_logger(), "0:: %d",i);
+                    RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[i]);
+                    break;
                 }
             }
+        }else{
+            for (int i = 355; i <= 364; ++i) {
+                int value = (i > 359) ? (i - 359) : i;
+                if (_laser_data[i] < 0.3 && _laser_data[i] != 0.3)
+                {
+                    _twist.linear.x = 0.0;
+                    _twist.angular.z = 0.0;
+                    // || _laser_data[315] < 0.3
+                    RCLCPP_INFO(this->get_logger(), "오른쪽 회전:: ");
+                    RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[0]);
+                    RCLCPP_INFO(this->get_logger(), "45:: %f", _laser_data[45]);
+                    RCLCPP_INFO(this->get_logger(), "315:: %f", _laser_data[315]);
+
+                    rotate_90_degrees();  // 벽을 만나면 90도 회전
+                }
+                std::cout << value << std::endl;
+            }
+            // 로봇이 전방이나 양 옆에서 벽을 감지할 때
             // else if (_laser_data[90] > 0.3) // 오른쪽 벽과 거리가 충분히 멀다면
             // {
             //     RCLCPP_INFO(this->get_logger(), "직진 왼쪽 회전:: ");
@@ -144,15 +153,16 @@ private:
         RCLCPP_INFO(this->get_logger(), "90도 로직");
         // 90도 회전 각속도 설정
         double angular_speed = -0.2; // 각속도 (rad/s)
-        double target_angle = - M_PI / 2; // 목표 회전 각도 (90도 = π/2 rad)
+        double target_angle = -M_PI / 2; // 목표 회전 각도 (90도 = π/2 rad)
         double current_angle = 0.0;
 
         // 시간 간격 설정
         rclcpp::Rate loop_rate(100); // 100Hz 주기
         auto start_time = this->now();
-
+        RCLCPP_INFO(this->get_logger(), "회전 : %f", current_angle);
+        RCLCPP_INFO(this->get_logger(), "회전 : %f", current_angle);
         // 회전 시작
-        while (rclcpp::ok() && current_angle < target_angle)
+        while (rclcpp::ok() && current_angle > target_angle)
         {
             _twist.linear.x = 0.0;
             _twist.angular.z = angular_speed;
