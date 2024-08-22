@@ -1,3 +1,4 @@
 hello world!
 Failed to connect: org.bluez.Error.NotAvailable br-connection-profile-unavailable
 sudo rfcomm bind rfcomm0
+98:DA:40:02:F8:A5
