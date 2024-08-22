@@ -2,6 +2,7 @@ hello world!
 Failed to connect: org.bluez.Error.NotAvailable br-connection-profile-unavailable
 sudo rfcomm bind rfcomm0
 98:DA:40:02:F8:A5
+D8:3A:DD:58:25:1A
 sudo modprobe -r btusb
 sudo modprobe btusb
 sudo systemctl restart bluetooth
