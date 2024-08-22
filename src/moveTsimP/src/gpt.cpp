@@ -62,6 +62,24 @@ private:
         _laser_data2 = msg;
         // 내부변수 업데이트.
         
+        _laser_data2.ranges.size();
+
+
+    // sensor_msgs::LaserScan scan;
+    // scan.header.stamp = scan_time;
+    // scan.header.frame_id = "laser_frame";
+    // scan.angle_min = -1.57;
+    // scan.angle_max = 1.57;
+    // scan.angle_increment = 3.14 / num_readings;
+    // scan.time_increment = (1 / laser_frequency) / (num_readings);
+    // scan.range_min = 0.0;
+    // scan.range_max = 100.0;
+    //for (long unsigned int i=0; i < msg.ranges.size();i++){
+        RCLCPP_INFO(this->get_logger(), "msg.angle_increment:: %f\n", msg.angle_increment);
+RCLCPP_INFO(this->get_logger(), "min:: %f\n", msg.angle_min);
+RCLCPP_INFO(this->get_logger(), "max:: %f\n", msg.angle_max);
+    //}
+
         RCLCPP_INFO(this->get_logger(), "_laser_data2.ranges.size():: %lu", _laser_data2.ranges.size());
         for (long unsigned int i=0; i < _laser_data2.ranges.size();i++)
         {
@@ -74,8 +92,14 @@ private:
             auto degree = (_laser_data2.angle_min+ _laser_data2.angle_increment * i)*180/3.1415926535;
             auto int_degree = (int)degree;
 
-            int corrected_degree = (int_degree + angle_offset + 360) % 360;  // 각도를 보정하고 0~359도로 제한
-            _laser_data[corrected_degree] = _laser_data2.ranges[i];
+            RCLCPP_INFO(this->get_logger(), "degree:: %d\n", int_degree);
+
+           // int corrected_degree = (int_degree + angle_offset + 360) % 360;  // 각도를 보정하고 0~359도로 제한
+
+            //RCLCPP_INFO(this->get_logger(), "corrected_degree:: %d\n",sb corrected_degree);
+
+            _laser_data[int_degree] = _laser_data2.ranges[i];
+
         }
     }
 
@@ -94,19 +118,19 @@ private:
             RCLCPP_INFO(this->get_logger(), "false로 돌아옴");
             for (int i = 355; i <= 364; ++i) {
                 int value = (i > 359) ? (i - 359) : i;
-                if (_laser_data[i] < 0.3)
+                if (_laser_data[value] < 0.2 && _laser_data[value] > 0.0f)
                 {
                     _is_wall = true;
                     RCLCPP_INFO(this->get_logger(), "wa");
-                    RCLCPP_INFO(this->get_logger(), "0:: %d",i);
-                    RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[i]);
+                    RCLCPP_INFO(this->get_logger(), "0:: %d",value);
+                    RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[value]);
                     break;
                 }
             }
         }else{
             for (int i = 355; i <= 364; ++i) {
                 int value = (i > 359) ? (i - 359) : i;
-                if (_laser_data[i] < 0.3 && _laser_data[i] != 0.3)
+                if (_laser_data[value] < 0.2 && _laser_data[value] > 0.0f)
                 {
                     _twist.linear.x = 0.0;
                     _twist.angular.z = 0.0;
@@ -117,34 +141,10 @@ private:
                     RCLCPP_INFO(this->get_logger(), "315:: %f", _laser_data[315]);
 
                     rotate_90_degrees();  // 벽을 만나면 90도 회전
+                    break;
                 }
                 std::cout << value << std::endl;
             }
-            // 로봇이 전방이나 양 옆에서 벽을 감지할 때
-            // else if (_laser_data[90] > 0.3) // 오른쪽 벽과 거리가 충분히 멀다면
-            // {
-            //     RCLCPP_INFO(this->get_logger(), "직진 왼쪽 회전:: ");
-            //     RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[90]);
-            //     // 약간 왼쪽으로 돌면서 전진
-            //     _twist.linear.x = 0.05;
-            //     _twist.angular.z = 0.1;
-            // }
-            // else if (_laser_data[90] < 0.2) // 오른쪽 벽과 너무 가깝다면
-            // {
-            //     RCLCPP_INFO(this->get_logger(), "직진 오른쪽 회전:: ");
-            //     RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[90]);
-            //     // 약간 오른쪽으로 돌면서 전진
-            //     _twist.linear.x = 0.05;
-            //     _twist.angular.z = -0.1;
-            // }
-            // else
-            // {
-            //     RCLCPP_INFO(this->get_logger(), "직진 :: ");
-            //     RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[90]);
-            //     // 벽을 따라 직진
-            //     _twist.linear.x = 0.1;
-            //     _twist.angular.z = 0.0;
-            // }
         }
     }
 
@@ -180,16 +180,18 @@ private:
             loop_rate.sleep();
         }
 
+
+
         // 회전 완료 후 정지
         _twist.angular.z = 0.0;
+        _is_wall = false;
+        
         _twist_pub->publish(_twist);
         RCLCPP_INFO(this->get_logger(), "회전완료");
 
         // 정면을 0도로 보정
         angle_offset = (angle_offset + 90) % 360;
         RCLCPP_INFO(this->get_logger(), "angle_offset : %d", angle_offset);
-
-        _is_wall = false;
     }
 
 
