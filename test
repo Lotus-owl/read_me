@@ -44,3 +44,22 @@ def receive_bluetooth_data():
 
 if __name__ == "__main__":
     receive_bluetooth_data()
+
+
+import bluetooth
+
+server_socket=bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+port = 1
+server_socket.bind(("",port)) # bind(host, port) > 포트 맵핑
+server_socket.listen(1) # bind 완료 후 listening:  클라이언트가 바인드된 포트로 연결을 할 때까지 기다리는 블럭킹 함수
+client_socket,address = server_socket.accept() # tuple(소켓, 주소정보) 리턴
+while 1:
+    data = client_socket.recv(1024)
+    msg = data.decode()[:-2]
+    print("Received: %s" % msg)
+    client_socket.sendall(data)
+    if (len(msg) == 6):
+        print ("Quit")
+        break
+client_socket.close()
+server_socket.close()
