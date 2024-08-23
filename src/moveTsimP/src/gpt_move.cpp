@@ -8,12 +8,10 @@
 
 #include <chrono>
 #include <iostream>
-#include <filesystem>
 // #include <serial/serial.h>
 
 using namespace std;
 using namespace std::chrono_literals;
-namespace fs = std::filesystem;
 
 class LaserSensor : public rclcpp::Node
 {
@@ -29,15 +27,6 @@ public:
         _update_timer = create_wall_timer(10ms, std::bind(&LaserSensor::update, this));
 
         _sub2 = create_subscription<sensor_msgs::msg::CompressedImage>("/image_raw/compressed", qos_profile2, std::bind(&LaserSensor::sub_img, this, std::placeholders::_1));
-
-        // 15초마다 이미지를 저장하는 타이머 추가
-        //_image_save_timer = create_wall_timer(5s, std::bind(&LaserSensor::save_image, this));
-    
-        // 이미지 저장 디렉토리 확인 및 생성
-        save_directory = "/home/leejieun/namee";
-        if (!fs::exists(save_directory)) {
-            fs::create_directories(save_directory);
-        }
     }
 
 private:
@@ -51,11 +40,6 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr _sub;
 
     rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr _sub2;
-    rclcpp::TimerBase::SharedPtr _image_save_timer; // 이미지 저장 타이머
-
-    cv::Mat _current_image; // 현재 이미지 저장
-    std::string save_directory; // 이미지 저장 디렉토리
-
     void sub_img(const sensor_msgs::msg::CompressedImage msg)
     {
         cv_bridge::CvImagePtr cv_ptr;
@@ -63,19 +47,6 @@ private:
         cv::Mat img = cv_ptr->image;
         cv::imshow("img", img);
         cv::waitKey(30);
-    }
-
-    void save_image() 
-    {
-        if (!_current_image.empty()) 
-        {
-            static int image_count = 0; // 이미지 카운트
-            std::string filename = save_directory + "img" + std::to_string(image_count++) + ".jpg";
-            cv::imwrite(filename, _current_image); // 이미지 저장
-            RCLCPP_INFO(this->get_logger(), "Saved image: %s", filename.c_str());
-        } else {
-            RCLCPP_WARN(this->get_logger(), "No image to save.");
-        }
     }
 
     void pub_twist()
@@ -184,15 +155,12 @@ private:
         }
 
         _is_wall = false;
-
+        
         _twist.linear.x = 0.0;
         _twist.angular.z = 0.0;
-        
         _twist_pub->publish(_twist);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-        
-        save_image();
         RCLCPP_INFO(this->get_logger(), "회전완료");
     }
 };
