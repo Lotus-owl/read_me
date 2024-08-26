@@ -23,15 +23,17 @@ public:
     {
         auto qos_profile = rclcpp::SensorDataQoS();
         auto qos_profile2 = rclcpp::QoS(rclcpp::KeepLast(10));
-        _sub = create_subscription<sensor_msgs::msg::LaserScan>("/scan", qos_profile, std::bind(&LaserSensor::sub_laser, this, std::placeholders::_1));
+        
         _twist_pub = create_publisher<geometry_msgs::msg::Twist>("cmd_vel", qos_profile2);
         _pub_timer = create_wall_timer(30ms, std::bind(&LaserSensor::pub_twist, this));
         _update_timer = create_wall_timer(10ms, std::bind(&LaserSensor::update, this));
 
+        //센서 서브
+        _sub = create_subscription<sensor_msgs::msg::LaserScan>("/scan", qos_profile, std::bind(&LaserSensor::sub_laser, this, std::placeholders::_1));
         _sub2 = create_subscription<sensor_msgs::msg::CompressedImage>("/image_raw/compressed", qos_profile2, std::bind(&LaserSensor::sub_img, this, std::placeholders::_1));
 
         // 15초마다 이미지를 저장하는 타이머 추가
-        //_image_save_timer = create_wall_timer(5s, std::bind(&LaserSensor::save_image, this));
+        _image_save_timer = create_wall_timer(5s, std::bind(&LaserSensor::save_image, this));
     
         // 이미지 저장 디렉토리 확인 및 생성
         save_directory = "/home/leejieun/namee";
@@ -60,9 +62,7 @@ private:
     {
         cv_bridge::CvImagePtr cv_ptr;
         cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-        cv::Mat img = cv_ptr->image;
-        cv::imshow("img", img);
-        cv::waitKey(30);
+        cv::Mat _current_image = cv_ptr->image;
     }
 
     void save_image() 
@@ -138,6 +138,8 @@ private:
                     _twist.angular.z = 0.0;
                     // || _laser_data[315] < 0.3
                     RCLCPP_INFO(this->get_logger(), "오른쪽 회전:: ");
+                    RCLCPP_INFO(this->get_logger(), "value : %f", _laser_data[value]);
+                    RCLCPP_INFO(this->get_logger(), "함수실행:: ");
                     //RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[0]);
                     //RCLCPP_INFO(this->get_logger(), "45:: %f", _laser_data[45]);
                     //RCLCPP_INFO(this->get_logger(), "315:: %f", _laser_data[315]);

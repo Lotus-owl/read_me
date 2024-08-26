@@ -109,6 +109,8 @@ private:
                     _twist.angular.z = 0.0;
                     // || _laser_data[315] < 0.3
                     RCLCPP_INFO(this->get_logger(), "오른쪽 회전:: ");
+                    RCLCPP_INFO(this->get_logger(), "value : %f", _laser_data[value]);
+                    RCLCPP_INFO(this->get_logger(), "함수실행:: ");
                     //RCLCPP_INFO(this->get_logger(), "0:: %f", _laser_data[0]);
                     //RCLCPP_INFO(this->get_logger(), "45:: %f", _laser_data[45]);
                     //RCLCPP_INFO(this->get_logger(), "315:: %f", _laser_data[315]);
