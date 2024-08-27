@@ -27,6 +27,9 @@ ament_target_dependencies(finding_the_labyrinth rclcpp geometry_msgs sensor_msgs
 add_executable(gpt src/gpt.cpp)
 ament_target_dependencies(gpt rclcpp geometry_msgs sensor_msgs cv_bridge OpenCV)
 
+add_executable(new_gpt src/new_gpt.cpp)
+ament_target_dependencies(new_gpt rclcpp geometry_msgs sensor_msgs)
+
 add_executable(gpt_img src/gpt_img.cpp)
 ament_target_dependencies(gpt_img rclcpp geometry_msgs sensor_msgs cv_bridge OpenCV)
 
@@ -37,6 +40,7 @@ ament_target_dependencies(gpt_move rclcpp geometry_msgs sensor_msgs cv_bridge Op
 install(TARGETS
   finding_the_labyrinth
   gpt
+  new_gpt
   gpt_img
   gpt_move
   DESTINATION lib/${PROJECT_NAME}
