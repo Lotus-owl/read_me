@@ -1,0 +1,10 @@
+sudo rfcomm bind rfcomm0
+
+식품건조기 mac: 98:DA:40:02:F8:A5
+터틀봇 mac: D8:3A:DD:58:25:1A
+
+sudo modprobe -r btusb
+sudo modprobe btusb
+sudo systemctl restart bluetooth
+bluetoothctl
+connect
